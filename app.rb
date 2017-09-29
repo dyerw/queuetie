@@ -23,8 +23,20 @@ config = {
 spotify_client = Spotify::Client.new(config)
 
 post '/receive_sms' do
-    x = JSON.parse request.body.read
-    track = spotify_client.track(x.fetch("id"))
+    msg = /&Body=(.*?)&/.match(request.body.read)[1]
+    pp msg 
+
+    track_id = nil
+    if msg.downcase().start_with? 'play+' 
+        search_term = msg.split('+').drop(1).join(' ')
+        res = spotify_client.search('track', search_term)
+        track_id = res.fetch("tracks").fetch("items")[0].fetch("uri").split(":")[2]
+    else
+        track_id = /track%2F(.*)$/.match(msg)[1]
+    end
+
+    pp track_id 
+    track = spotify_client.track(track_id)
     spotify_client.add_user_tracks_to_playlist('123031849', '5Vf9oOTnJGvfYVOrOqo2GH', uris = [track.fetch("uri")], position = nil)
     "success maybe?"
 end
