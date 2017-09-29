@@ -22,11 +22,6 @@ config = {
 }
 spotify_client = Spotify::Client.new(config)
 
-get '/playlist' do
-    'hello world'
-end
-
-
 post '/receive_sms' do
     x = JSON.parse request.body.read
     track = spotify_client.track(x.fetch("id"))
